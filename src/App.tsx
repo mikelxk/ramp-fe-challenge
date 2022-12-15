@@ -1,12 +1,12 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
-import { Employee } from "./utils/types"
 import { InputSelect } from "./components/InputSelect"
-import { TransactionPane } from "./components/TransactionPane"
 import { Instructions } from "./components/Instructions"
+import { TransactionPane } from "./components/TransactionPane"
 import { useEmployees } from "./hooks/useEmployees"
 import { usePaginatedTransactions } from "./hooks/usePaginatedTransactions"
 import { useTransactionsByEmployee } from "./hooks/useTransactionsByEmployee"
 import { EMPTY_EMPLOYEE } from "./utils/constants"
+import { Employee } from "./utils/types"
 
 export function App() {
   const { data: employees, ...employeeUtils } = useEmployees()
@@ -61,7 +61,8 @@ export function App() {
             label: `${item.firstName} ${item.lastName}`,
           })}
           onChange={async (newValue) => {
-            if (newValue === null) {
+            if (newValue === null || newValue.id === "") {
+              await loadAllTransactions()
               return
             }
 
@@ -81,15 +82,17 @@ export function App() {
                   <TransactionPane key={transaction.id} transaction={transaction} />
                 ))}
               </div>
-              <button
-                className="RampButton"
-                disabled={paginatedTransactionsUtils.loading}
-                onClick={async () => {
-                  await loadAllTransactions()
-                }}
-              >
-                View More
-              </button>
+              {paginatedTransactions?.nextPage ? (
+                <button
+                  className="RampButton"
+                  disabled={paginatedTransactionsUtils.loading}
+                  onClick={async () => {
+                    await loadAllTransactions()
+                  }}
+                >
+                  View More
+                </button>
+              ) : null}
             </Fragment>
           )}
         </div>
